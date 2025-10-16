@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { useGetRateToUSDQuery } from "~/api/ratesApi";
-import { formatCurrency, formatDateCZ } from "./format";
+import { formatCurrency } from "./format";
 import { currencies } from "./constants";
 import type { Row } from "./types";
+import ResultsTable from "./components/ResultsTable";
 
 export function Converter() {
   const [amount, setAmount] = useState<string>("");
@@ -19,9 +20,12 @@ export function Converter() {
   }, [amount, rateToUSD]);
 
   const [rows, setRows] = useState<Row[]>([]);
-  const totalUSD = rows.reduce((sum, r) => sum + r.usdAmount, 0);
+  const totalUSD = useMemo(
+    () => rows.reduce((sum, r) => sum + r.usdAmount, 0),
+    [rows],
+  );
 
-  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+  function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const n = Number(amount);
 
@@ -130,7 +134,7 @@ export function Converter() {
           >
             {isFetching && "Fetching USD rate…"}
             {isError && "Could not fetch rate. Please try again."}
-            {!isFetching && !isError && usdAmount !== undefined && (
+            {!isFetching && !isError && usdAmount && (
               <>≈ {formatCurrency(usdAmount, "USD")}</>
             )}
             {!isFetching && !isError && !usdAmount && <>≈ ... USD</>}
@@ -138,51 +142,7 @@ export function Converter() {
         </form>
       </div>
 
-      {/* Results table */}
-      <section className="mt-8">
-        <div className="overflow-x-auto rounded-2xl border border-foreground/20">
-          <table className="min-w-full text-sm">
-            <thead className="bg-gray-50 dark:bg-white/5">
-              <tr>
-                <th className="text-left px-4 py-3 font-medium">Original</th>
-                <th className="text-left px-4 py-3 font-medium">Converted</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.length === 0 ? (
-                <tr>
-                  <td className="px-4 py-3 opacity-70" colSpan={2}>
-                    No rows yet — enter an amount and click “Convert to US
-                    Dollars”.
-                  </td>
-                </tr>
-              ) : (
-                rows.map((r, i) => (
-                  <tr key={i} className="border-t border-foreground/10">
-                    <td className="px-4 py-3">
-                      {`${new Intl.NumberFormat("cs-CZ", {
-                        maximumFractionDigits: 2,
-                      }).format(r.originalAmount)} ${r.originalCurrency}`}
-                    </td>
-                    <td className="px-4 py-3">
-                      {formatCurrency(r.usdAmount, "USD")}{" "}
-                      <span className="opacity-70">
-                        — according to conversion rate on{" "}
-                        {formatDateCZ(r.rateDateISO)}
-                      </span>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Total */}
-        <div className="mt-4 text-right font-medium">
-          Total: {formatCurrency(totalUSD, "USD")}
-        </div>
-      </section>
+      <ResultsTable rows={rows} totalUSD={totalUSD} />
     </main>
   );
 }

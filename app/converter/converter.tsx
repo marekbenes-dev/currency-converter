@@ -1,37 +1,15 @@
-import { useEffect, useMemo, useState } from "react";
-import { useGetRateToUSDQuery, useGetCurrenciesQuery } from "~/api/ratesApi";
-import ThemeToggle from "~/components/ThemeToggle";
+import { useMemo, useState } from "react";
+import { useGetRateToUSDQuery } from "~/api/ratesApi";
 import { formatCurrency, formatDateCZ } from "./format";
-import { FALLBACK_CURRENCIES } from "./constants";
+import { currencies } from "./constants";
 import type { Row } from "./types";
 
 export function Converter() {
   const [amount, setAmount] = useState<string>("");
   const [currency, setCurrency] = useState<string>("EUR");
 
-  const {
-    data: currenciesMap,
-    isLoading: isCurrenciesLoading,
-    isError: isCurrenciesError,
-  } = useGetCurrenciesQuery();
-
-  const currencyOptions = useMemo(() => {
-    const src =
-      currenciesMap && !isCurrenciesError ? currenciesMap : FALLBACK_CURRENCIES;
-    return Object.entries(src)
-      .map(([code, name]) => ({ code, name }))
-      .sort((a, b) => a.code.localeCompare(b.code));
-  }, [currenciesMap, isCurrenciesError]);
-
-  useEffect(() => {
-    const codes = new Set(currencyOptions.map((c) => c.code));
-    if (!codes.has(currency) && currencyOptions.length > 0) {
-      setCurrency(currencyOptions[0].code);
-    }
-  }, [currencyOptions, currency]);
-
   const { data, isFetching, isError } = useGetRateToUSDQuery(currency);
-  const rateToUSD = data?.rates?.USD ?? (currency === "USD" ? 1 : undefined);
+  const rateToUSD = data?.rates?.USD;
 
   const usdAmount = useMemo(() => {
     const n = Number(amount);
@@ -46,8 +24,8 @@ export function Converter() {
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const n = Number(amount);
-    if (!amount.trim() || Number.isNaN(n) || n < 0) return;
-    if (isFetching || isError || rateToUSD === undefined) return;
+
+    if (rateToUSD === undefined) return;
 
     setRows((prev) => [
       ...prev,
@@ -111,20 +89,12 @@ export function Converter() {
                 name="currency"
                 aria-label="Currency"
                 required
-                disabled={isCurrenciesLoading}
               >
-                {isCurrenciesLoading &&
-                  FALLBACK_CURRENCIES.map((C) => (
-                    <option key={C.code} value={C.code}>
-                      {C.code} — {C.name}
-                    </option>
-                  ))}
-                {!isCurrenciesLoading &&
-                  currencyOptions.map((c) => (
-                    <option key={c.code} value={c.code}>
-                      {c.code} — {c.name}
-                    </option>
-                  ))}
+                {currencies.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.code} — {c.name}
+                  </option>
+                ))}
               </select>
             </label>
           </div>
@@ -213,9 +183,6 @@ export function Converter() {
           Total: {formatCurrency(totalUSD, "USD")}
         </div>
       </section>
-      <div className="absolute right-[15px] top-[10px]">
-        <ThemeToggle></ThemeToggle>
-      </div>
     </main>
   );
 }

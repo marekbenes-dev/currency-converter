@@ -8,7 +8,9 @@
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "setup:hooks": "git config core.hooksPath .githooks",
+    "postinstall": "npm run setup:hooks"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

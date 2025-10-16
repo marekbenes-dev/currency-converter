@@ -26,7 +26,7 @@ const ResultsTable = memo(function ResultsTable({ rows, totalUSD }: Props) {
           </thead>
           <tbody>
             {rows.length === 0 ? (
-              <tr>
+              <tr key={0}>
                 <td className="px-4 py-3 opacity-70" colSpan={2}>
                   No rows yet — enter an amount and click “Convert to US
                   Dollars”.
@@ -34,7 +34,7 @@ const ResultsTable = memo(function ResultsTable({ rows, totalUSD }: Props) {
               </tr>
             ) : (
               rows.map((r, i) => (
-                <tr id={String(i)} className="border-t border-foreground/10">
+                <tr key={i} className="border-t border-foreground/10">
                   <td className="px-4 py-3">
                     {`${nf.format(r.originalAmount)} ${r.originalCurrency}`}
                   </td>

@@ -41,7 +41,7 @@ export function Converter() {
   return (
     <main className="flex flex-col justify-center pt-12 md:pt-16 pb-4 container mx-auto md:p-6 p-4 mx-auto max-w-5xl">
       <header className="flex flex-col pb-8 flex-shrink-0 items-center">
-        <h1 className="font-semibold text-2xl">Currency convertor</h1>
+        <h1 className="font-semibold text-2xl">Currency converter</h1>
         <span className="font-medium text-lg">Zentity homework</span>
       </header>
 

@@ -2,8 +2,8 @@ import { Converter } from "../converter/converter";
 
 export function meta() {
   return [
-    { title: "Currency convertor" },
-    { name: "description", content: "Welcome to currency convertor!" },
+    { title: "Currency converter" },
+    { name: "description", content: "Welcome to currency converter!" },
   ];
 }
 
